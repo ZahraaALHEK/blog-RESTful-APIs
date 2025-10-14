@@ -1,9 +1,9 @@
 const express = require("express");
-const isAuth = require("./../middlewares/isAuth")
-const isAdmin = require("./../middlewares/isAdmin")
+const isAuth = require("./../middlewares/isAuth");
+const isAdmin = require("./../middlewares/isAdmin");
 const { categoryControllers} = require("./../controllers/index");
 const validator  = require("./../validators/validator");
-const {addCategoryValidator,IDValidator} = require("./../validators/categoryValidator") 
+const {addCategoryValidator,IDValidator} = require("./../validators/categoryValidator");
 const router = express.Router();
 router.post("/",isAuth,isAdmin ,addCategoryValidator,validator,categoryControllers.addCategory);
 router.put("/:id",isAuth,isAdmin,IDValidator,validator,categoryControllers.updateCategory);

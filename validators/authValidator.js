@@ -1,4 +1,4 @@
-const mongoose = require(mongoose)
+const mongoose = require("mongoose")
 const {check} = require("express-validator");
 const validateEmail = require("./validateEmail");
 const signupValidator = [

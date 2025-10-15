@@ -1,63 +1,82 @@
 const path = require("path");
-const {File} = require("./../models/index")
-const  {valideExt}  = require("./../validators/fileValidator");
-const {uploadFileToS3} = require("./../utils/awsS3");
-const upload = async (req,res,next) => {
- try {
-   const {file} = req;
-   if(!file){
-      const err = new Error("file is required");
-      err.codeStatus = 400;
-      return next(err);
-   }
-   const ext = path.extname(file.originalname);
-   if(!valideExt(ext)){
-      const err = new Error("Only .png, .jpg, .jpeg, and .pdf formats are allowed!");
-      err.codeStatus = 400;
-      return next(err);
-   }
-   const key = await uploadFileToS3({file,ext});
-   if(key){
-      const newFile = new File({
-         key ,
-         size : file.size ,
-         mimetype : mimetype ,
-         createBy : req.user._id
-      });
-      await newFile.save();
-      res.status(200).json({
-      status : true,
-      code: 200,
-      data : key
-   })
-   }else{
-      const err = new Error("file not saved in db");
-      err.codeStatus = 400;
-      return next(err);
-   }
+const { validateExtension } = require("../validators/fileValidator");
+const {
+  uploadFileToS3,
+  signedUrl,
+  deleteFileFromS3,
+} = require("../utils/awsS3");
+const { File } = require("../models");
 
-} catch (error) {
-    console.log(error);
-    return next(error);
-}   
+const uploadFile = async (req, res, next) => {
+  try {
+    const { file } = req;
+
+    if (!file) {
+      res.code = 400;
+      throw new Error("File is not selected");
+    }
+
+    const ext = path.extname(file.originalname);
+    const isValidExt = validateExtension(ext);
+
+    if (!isValidExt) {
+      res.code = 400;
+      throw new Error("Only .jpg or .jpeg or .png format is allowed");
+    }
+
+    const key = await uploadFileToS3({ file, ext });
+    let newFile = null;
+    if (key) {
+      newFile = new File({
+        key,
+        size: file.size,
+        mimetype: file.mimetype,
+        createdBy: req.user._id,
+      });
+
+      await newFile.save();
+    }
+
+    res.status(201).json({
+      code: 201,
+      status: true,
+      message: "File uploaded successfully",
+      data: { key, _id: newFile._id },
+    });
+  } catch (error) {
+    next(error);
+  }
 };
-const getSignedURl = async (req,res,next) => {
-   try {
-      const {key} = req.query;
-      const url = await getSignedURl(key);
-      if(!url){
-      const err = new Error("url not found");
-      err.codeStatus = 404;
-      return next(err);
-      }
-      res.status(200).json({
-         code : 200 ,
-         message : "Get signed successfully" ,
-         data : {url}
-      })
-   } catch (error) {
-      console.log(error);
-    return next(error);
-   }
-}
-module.exports = {upload,getSignedURl}
+
+const getSignedUrl = async (req, res, next) => {
+  try {
+    const { key } = req.query;
+    const url = await signedUrl(key);
+
+    res.status(200).json({
+      code: 200,
+      status: true,
+      message: "Get signed url successfully",
+      data: { url },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const deleteFile = async (req, res, next) => {
+  try {
+    const { key } = req.query;
+
+    await deleteFileFromS3(key);
+    await File.findOneAndDelete({ key });
+
+    res
+      .status(200)
+      .json({ code: 200, status: true, message: "File deleted successfully" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = { uploadFile, getSignedUrl, deleteFile };

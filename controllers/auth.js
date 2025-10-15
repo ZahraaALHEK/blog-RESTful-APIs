@@ -208,15 +208,23 @@ const changePassword = async(req,res,next) => {
 const updateProfile = async (req,res,next) => {
    try {
         const _id = req.user._id ;
-        const {email,name} = req.body;
+        const {email,name , profilePic } = req.body;
         const user = await User.findById(_id);
         if(!user){
             const error = new Error("user not found");
             error.statusCode = 401;
             next(error);
         }
+        if (profilePic) {
+        const file = await File.findById(profilePic);
+        if (!file) {
+           res.code = 404;
+           throw new Error("File not found");
+        }
+    }
         user.name = name ?? user.name;
         user.email = email ?? user.email;
+        user.profilePic = profilePic;
         if(email){
             user.isVerified = false;
         }

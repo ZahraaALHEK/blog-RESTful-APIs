@@ -1,3 +1,4 @@
+const mongoose = require(mongoose)
 const {check} = require("express-validator");
 const validateEmail = require("./validateEmail");
 const signupValidator = [
@@ -38,6 +39,11 @@ const updateProfileValidator = [
       throw new Error("Invalid email format"); 
     }
     return true;
+  }),
+    check("profilePic").custom(async (profilePic) => {
+    if (profilePic && !mongoose.Types.ObjectId.isValid(profilePic)) {
+      throw "Invalid profile picture";
+    }
   })
 ];
 module.exports = {

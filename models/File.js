@@ -8,11 +8,11 @@ const fileSchema = mongoose.Schema({
     mimetype : String ,
     createBy : {
         type : mongoose.Types.ObjectId ,
-        ref : user
+        ref : "user"
     }
 } , 
 {
     timestamps : true
 });
 const File = mongoose.model("file",fileSchema);
-module.exports = User ;
+module.exports = File ;

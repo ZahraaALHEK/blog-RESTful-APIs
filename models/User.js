@@ -28,7 +28,8 @@ const userSchema = mongoose.Schema({
         type:Boolean,
         default:false
     },
-    forgetPasswordCode : String
+    forgetPasswordCode : String ,
+    profilePic : { type: mongoose.Types.ObjectId, ref: "file" },
 },
 {timestamps:true}
 );

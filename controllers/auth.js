@@ -218,8 +218,9 @@ const updateProfile = async (req,res,next) => {
         if (profilePic) {
         const file = await File.findById(profilePic);
         if (!file) {
-           res.code = 404;
-           throw new Error("File not found");
+           const error = new Error("File not found");
+            error.statusCode = 404;
+            next(error);
         }
     }
         user.name = name ?? user.name;
@@ -235,4 +236,27 @@ const updateProfile = async (req,res,next) => {
     next(error);
    } 
 }
-module.exports = {signup,signin,verifyCode,verifyUser,forgetPasswordCode,recoverPassword,changePassword,updateProfile}
+const currentUser = async (req,res,next) => {
+    try {
+        const {_id} = req.user;
+        const user = await User.findById(_id)
+        .select("-password -verificationCode -forgotPasswordCode")
+        .populate("profilePic");
+        if(!user){
+            const error = new Error("user not found");
+            error.statusCode = 404;
+            next(error);
+        }
+        res.status(200).json({
+        code: 200,
+        status: true,
+        message: "Get current user successfully",
+        data: { user },
+        });
+    } catch (error) {
+        console.log(error);
+        next(error);    
+    }
+    
+}
+module.exports = {signup,signin,verifyCode,verifyUser,forgetPasswordCode,recoverPassword,changePassword,updateProfile,currentUser}

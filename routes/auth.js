@@ -12,4 +12,5 @@ router.post("/forget-password-code",emailValidator,validator,authControllers.for
 router.post("/recover-password",recoverPasswordValidator,validator,authControllers.recoverPassword);
 router.put("/change-password",changePasswordValidator,validator,isAuth,authControllers.changePassword);
 router.put("/update-profile",updateProfileValidator,validator,isAuth,authControllers.updateProfile);
+router.get("/current-user",isAuth,authControllers.currentUser);
 module.exports = router;

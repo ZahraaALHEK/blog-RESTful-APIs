@@ -7,7 +7,7 @@ const {
   updatePostValidator,
   idValidator,
 } = require("../validators/post");
-const validate = require("../validators/validate");
+const validate = require("../validators/validator");
 
 router.post("/", isAuth, addPostValidator, validate, postController.addPost);
 

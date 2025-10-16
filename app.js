@@ -2,10 +2,10 @@ const express = require("express")
 const dotenv = require("dotenv")
 const DB = require("./init/mongodb")
 const app = express()
-const {authRouter,categoryRouter , fileRouter} = require("./routes")
+const {authRouter,categoryRouter , fileRouter , postRouter } = require("./routes")
 const {errorHandel} = require("./middlewares")
 const notFound = require("./controllers/notFound")
-const morgan = require("morgan")
+const morgan = require("morgan");
 dotenv.config()
 DB();
 app.use(express.json());
@@ -16,6 +16,7 @@ app.use(morgan("dev"));
 app.use("/api/v1/auth",authRouter);
 app.use("/api/v1/category",categoryRouter);
 app.use("/api/v1/file",fileRouter);
+app.use("/api/v1/post",postRouter);
 app.use(notFound);
 app.use(errorHandel);
 module.exports = app;
